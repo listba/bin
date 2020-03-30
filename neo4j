@@ -25,8 +25,7 @@ case $1 in
         -v $DUMPS:/dumps \
         neo4j:$NEO_VERSION \
         neo4j-admin load --force --from /dumps/$2 \
-        && echo "Successfully loaded dump" 
-        || echo "failed to load dump:  $2"
+        && echo "Successfully loaded dump" || echo "failed to load dump:  $2"
       docker rm neo4j-load >/dev/null
       neo4j start
     else
