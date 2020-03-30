@@ -1,6 +1,6 @@
 #!/bin/bash
 # Neo4j shell script to assist me in managing neo4j as a docker image
-  # and he ability to dump/load database backups as needed
+# and the ability to dump/load database backups as needed
 
 NEO_VERSION="3.5.0"
 DUMPS=$HOME/Documents/data/dumps
@@ -65,11 +65,11 @@ case $1 in
     ;;
   *)
     echo "
-      create - creates the docker container
-      logs - shows tail of logs of neo4j container
-      start - starts the neo4j docker container
-      stop - stops the neo4j docker container
-      enter - starts a shell session in the neo4j container
+      create - creates the neo4j docker container
+      logs   - shows tail of logs of neo4j container
+      start  - starts the neo4j docker container
+      stop   - stops the neo4j docker container
+      enter  - starts a shell session in the neo4j container
       " | cat
     ;;
 esac
