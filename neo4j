@@ -1,0 +1,76 @@
+#!/bin/bash
+# Neo4j shell script to assist me in managing neo4j as a docker image
+  # and he ability to dump/load database backups as needed
+
+NEO_VERSION="3.5.0"
+DUMPS=$HOME/Documents/data/dumps
+DATA=/data
+case $1 in
+  create)
+    docker container run \
+      -d --name neo4j \
+      -v neo4j-data:$DATA \
+      -p 7474:7474 -p 7687:7687 \
+      neo4j:$NEO_VERSION \
+      && echo "Neo4j successfully started up" \
+      || echo "Failed to start neo4j"
+    ;;
+  load)
+    if test -f "$DUMPS/$2"; then
+      neo4j stop
+      echo "Loading $DUMPS/$2 into Neo4j"
+      docker container run \
+        --name neo4j-load \
+        -v neo4j-data:$DATA \
+        -v $DUMPS:/dumps \
+        neo4j:$NEO_VERSION \
+        neo4j-admin load --force --from /dumps/$2 \
+        && echo "Successfully loaded dump" 
+        || echo "failed to load dump:  $2"
+      docker rm neo4j-load >/dev/null
+      neo4j start
+    else
+      echo "no such dumpfile at:  $DUMPS/$2"
+    fi
+    ;;
+  dump)
+    dname=$(date +"graph-%Y-%m-%d_%H%M.db")
+    neo4j stop
+    docker container run \
+      --rm --name neo4-dump \
+      -v neo4j-data:$DATA \
+      -v $DUMPS:/dumps \
+      neo4j:$NEO_VERSION \
+      neo4j-admin dump --to /dumps/$dname \
+      && echo "Neo4j dump created $DUMPS/$dname" \
+      || echo "Failed to create dump $DUMPS/$dname"
+      ;;
+  start)
+    docker container start neo4j \
+    >/dev/null \
+    && echo "Neo4j running" \
+    || echo "Neo4j failed to start:"
+    ;;
+  stop)
+    docker container stop neo4j \
+    >/dev/null \
+    && echo "Neo4j stopped" \
+    || echo "Neo4j failed to stop"
+    ;;
+  logs)
+    docker container logs neo4j
+    ;;
+  enter)
+    docker container exec -it neo4j /bin/bash
+    ;;
+  *)
+    echo "
+      create - creates the docker container
+      logs - shows tail of logs of neo4j container
+      start - starts the neo4j docker container
+      stop - stops the neo4j docker container
+      enter - starts a shell session in the neo4j container
+      " | cat
+    ;;
+esac
+
