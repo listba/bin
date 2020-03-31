@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Absolute path this script is in
+SCRIPTPATH=`dirname $0`
+
+docker image inspect sbt-docker >/dev/null
+if [ $? = 1 ]
+then
+  docker build -t sbt-docker:latest - < $SCRIPTPATH/sbt-docker.Dockerfile
+fi
+
+docker run -it --rm \
+  --mount type=bind,source=$(pwd),target=/app \
+  --mount type=bind,source=$HOME/.sbt/.credentials,target=/.credentials \
+  -e SBT_CREDENTIALS=/.credentials \
+  sbt-docker \
+  sbt "$@" # remember for later: use ${@:2} if you need to splice
